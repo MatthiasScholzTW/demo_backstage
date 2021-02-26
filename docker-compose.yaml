@@ -1,0 +1,37 @@
+version: '3'
+services:
+  backstage:
+    image: backstage
+    environment:
+      # This value must match the name of the postgres configuration block.
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      # Add your token here
+      GITHUB_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
+    ports:
+      - '7000:7000'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      # NOT RECOMMENDED for a production environment. Trusts all incomming
+      # connections.
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  lighthouse:
+    image: spotify/lighthouse-audit-service:latest
+    restart: always
+    environment:
+      LAS_PORT: 8000
+      LAS_CORS: "true"
+      PGHOST: db
+      PGUSER: postgres
+      # PGDATABASE: process.env.USER
+      # PGPASSWORD: null
+      # PGPORT: 5432
+    ports:
+      - '8000:8000'
